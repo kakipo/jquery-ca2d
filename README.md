@@ -1,4 +1,4 @@
-ca2d
+ca2d.js
 ====
 
-Cellular Automaton 2D
+jQuery plugin for Cellular Automaton 2D.
