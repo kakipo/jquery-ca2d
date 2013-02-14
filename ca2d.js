@@ -8,15 +8,15 @@
       aliveColor: "#aaaaaa",
       deadColor: "#ffffff",
       fieldColor: "#ffffff",
-      rule: function(selfStatus, neighborStatuses) {
+      rule: function(selfstate, neighborStates) {
 
         var otherTotal = 0;
-        jQuery.each(neighborStatuses, function(idx, value) {
+        jQuery.each(neighborStates, function(idx, value) {
           otherTotal += value;
         });
 
-        var nextState = selfStatus;
-        if(selfStatus == 1) {
+        var nextState = selfstate;
+        if(selfstate == 1) {
           if(otherTotal <= 1 || otherTotal >= 4) {
             nextState = 0;
           }
@@ -42,93 +42,83 @@
 
       var cW = $this.width();
       var cH = $this.height();
-
-      var cvs = new Canvas(cW, cH, settings.cellSize);
-      upd_status(cvs, settings.rule);
-
+      var grid = new Grid(cW, cH, settings.cellSize);
       var ctx = this.getContext('2d');
-      print(ctx, cvs);
+
+      step(ctx, grid);
 
       // determine mobile / pc
       var agent = navigator.userAgent;
       if(agent.search(/iPhone/) != -1 || agent.search(/iPad/) != -1) {
-        this.ontouchstart = function(e) {
+        $this.on("touchstart touchmove touchend", function(e){
           e.preventDefault();
-          upd_status(cvs, settings.rule);
-          print(ctx, cvs);
-        }
-        this.ontouchmove = function(e) {
-          e.preventDefault();
-          upd_status(cvs, settings.rule);
-          print(ctx, cvs);
-        }
-        this.ontouchend = function(e) {
-          e.preventDefault();
-          upd_status(cvs, settings.rule);
-          print(ctx, cvs);
-        }
-      } else {
-        this.onmousemove = function(e) {
-          upd_status(cvs, settings.rule);
-          print(ctx, cvs);
-        }
+          step(ctx, grid);
+        });
+      } else {    
+        $this.on("mousemove", function(e){
+          step(ctx, grid);
+        });
       }
     });
 
+    function step(ctx, grid) {
+      updState(grid);
+      print(ctx, grid);
+    }
 
-    function upd_status(cvs, rule) {
+    function updState(grid) {
       // A B C
       // D E F
       // H I J
-      for(var i = 0; i < cvs.rows; i++) {
+      for(var i = 0; i < grid.rows; i++) {
 
-        var row = cvs.cells[i];
+        var row = grid.cells[i];
 
-        for(var j = 0; j < cvs.cols; j++) {
+        for(var j = 0; j < grid.cols; j++) {
 
           var cell = row[j]; // cell_E
-          var cell_A = cvs.cells[i - 1 < 0 ? cvs.rows - 1 : i - 1][j - 1 < 0 ? cvs.cols - 1 : j - 1];
-          var cell_B = cvs.cells[i - 1 < 0 ? cvs.rows - 1 : i - 1][j];
-          var cell_C = cvs.cells[i - 1 < 0 ? cvs.rows - 1 : i - 1][j + 1 >= cvs.cols ? 0 : j + 1];
+          var cell_A = grid.cells[i - 1 < 0 ? grid.rows - 1 : i - 1][j - 1 < 0 ? grid.cols - 1 : j - 1];
+          var cell_B = grid.cells[i - 1 < 0 ? grid.rows - 1 : i - 1][j];
+          var cell_C = grid.cells[i - 1 < 0 ? grid.rows - 1 : i - 1][j + 1 >= grid.cols ? 0 : j + 1];
 
-          var cell_D = cvs.cells[i][j - 1 < 0 ? cvs.cols - 1 : j - 1];
-          var cell_F = cvs.cells[i][j + 1 >= cvs.cols ? 0 : j + 1];
+          var cell_D = grid.cells[i][j - 1 < 0 ? grid.cols - 1 : j - 1];
+          var cell_F = grid.cells[i][j + 1 >= grid.cols ? 0 : j + 1];
 
-          var cell_H = cvs.cells[i + 1 >= cvs.rows ? 0 : i + 1][j - 1 < 0 ? cvs.cols - 1 : j - 1];
-          var cell_I = cvs.cells[i + 1 >= cvs.rows ? 0 : i + 1][j];
-          var cell_J = cvs.cells[i + 1 >= cvs.rows ? 0 : i + 1][j + 1 >= cvs.cols ? 0 : j + 1];
+          var cell_H = grid.cells[i + 1 >= grid.rows ? 0 : i + 1][j - 1 < 0 ? grid.cols - 1 : j - 1];
+          var cell_I = grid.cells[i + 1 >= grid.rows ? 0 : i + 1][j];
+          var cell_J = grid.cells[i + 1 >= grid.rows ? 0 : i + 1][j + 1 >= grid.cols ? 0 : j + 1];
 
-          cell.nextStatus = rule(cell.status, [cell_A.status, cell_B.status, cell_C.status, cell_D.status, cell_F.status, cell_H.status, cell_I.status, cell_J.status]);
+          cell.nextstate = settings.rule(cell.state, [cell_A.state, cell_B.state, cell_C.state, cell_D.state, cell_F.state, cell_H.state, cell_I.state, cell_J.state]);
 
         } // end of for col
       } // end of for row
-    } // end of upd_status
+    } // end of updState
 
-    function print(ctx, cvs) {
+    function print(ctx, grid) {
 
-      for(var i = 0; i < cvs.rows; i++) {
+      for(var i = 0; i < grid.rows; i++) {
 
-        var row = cvs.cells[i];
-        var y = i * cvs.cellSize;
-        for(var j = 0; j < cvs.cols; j++) {
+        var row = grid.cells[i];
+        var y = i * grid.cellSize;
+        for(var j = 0; j < grid.cols; j++) {
 
-          var x = j * cvs.cellSize;
+          var x = j * grid.cellSize;
 
           var cell = row[j];
 
-          if(cell.nextStatus == 1) {
+          if(cell.nextstate == 1) {
             ctx.fillStyle = cell.color;
-            ctx.fillRect(x, y, cvs.cellSize, cvs.cellSize);
+            ctx.fillRect(x, y, grid.cellSize, grid.cellSize);
           } else {
-            ctx.clearRect(x, y, cvs.cellSize, cvs.cellSize);
+            ctx.clearRect(x, y, grid.cellSize, grid.cellSize);
           }
 
-          cell.status = cell.nextStatus;
+          cell.state = cell.nextstate;
         }
       }
     } // end of print
 
-    function Canvas(x, y, cellSize) {
+    function Grid(x, y, cellSize) {
 
       this.x = x;
       this.y = y;
@@ -144,10 +134,10 @@
 
         for(var j = 0; j < this.cols; j++) {
 
-          var status = Math.round(Math.random()); // 0 or 1
+          var state = Math.round(Math.random()); // 0 or 1
           var color = settings.aliveColor;
 
-          row[j] = new Cell(i, j, color, status);
+          row[j] = new Cell(i, j, color, state);
         }
 
         cells[i] = row;
@@ -155,16 +145,16 @@
 
       this.cells = cells;
 
-      function Cell(x, y, color, status) {
+      function Cell(x, y, color, state) {
         this.x = x;
         this.y = y;
         this.color = color;
-        this.status = status;
-        this.nextStatus = status;
+        this.state = state;
+        this.nextstate = state;
         this.extPeriod = 0;
       } // end of Cell
 
-    } // end of Canvas
+    } // end of grid
     
   }; // end of $.fn.ca2d
 })(jQuery);
