@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>ca2d.js</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="jquery.ca2d.min.js"></script>
+</head>
+<body>
+<script>
+$(document).ready(function() {
+  $cvs = $('#myCanvas');
+  $cvs.ca2d();
+  $cvs.ca2d("step");
+});
+
+</script>
+<h1>sample</h1>
+<canvas id="myCanvas" width="400" height="400"></canvas>  
+
+</body>
+</html>

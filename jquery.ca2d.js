@@ -8,8 +8,10 @@
       aliveColor: "#aaaaaa",
       deadColor: "#ffffff",
       fieldColor: "#ffffff",
+      color: function(state) {
+        return state == 1 ? "#aaaaaa" : "#ffffff";
+      },
       rule: function(selfstate, neighborStates) {
-
         var otherTotal = 0;
         jQuery.each(neighborStates, function(idx, value) {
           otherTotal += value;
@@ -26,7 +28,6 @@
           }
         }
         return nextState;
-
       },
       mutation: true
     }
@@ -50,15 +51,16 @@
       // determine mobile / pc
       var agent = navigator.userAgent;
       if(agent.search(/iPhone/) != -1 || agent.search(/iPad/) != -1) {
-        $this.on("touchstart touchmove touchend", function(e){
+        $this.on("touchstart touchmove touchend", function(e) {
           e.preventDefault();
           step(ctx, grid);
         });
-      } else {    
-        $this.on("mousemove", function(e){
+      } else {
+        $this.on("mousemove", function(e) {
           step(ctx, grid);
         });
       }
+
     });
 
     function step(ctx, grid) {
@@ -106,13 +108,10 @@
 
           var cell = row[j];
 
-          if(cell.nextstate == 1) {
-            ctx.fillStyle = cell.color;
-            ctx.fillRect(x, y, grid.cellSize, grid.cellSize);
-          } else {
-            ctx.clearRect(x, y, grid.cellSize, grid.cellSize);
-          }
+          ctx.fillStyle = settings.color(cell.nextstate);
+          ctx.fillRect(x, y, grid.cellSize, grid.cellSize);
 
+          // step futher
           cell.state = cell.nextstate;
         }
       }
@@ -153,8 +152,6 @@
         this.nextstate = state;
         this.extPeriod = 0;
       } // end of Cell
-
     } // end of grid
-    
   }; // end of $.fn.ca2d
 })(jQuery);
