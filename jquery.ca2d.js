@@ -5,8 +5,6 @@
 
     init: function(options) {
 
-      console.log("init");
-
       var settings = $.extend({}, $.fn.ca2d.defaults, options);
 
       return this.filter('canvas').each(function() {
@@ -70,6 +68,7 @@
     // end of init
 
     step: function() {
+
       return this.filter('canvas').each(function() {
 
         $this = $(this);
@@ -79,11 +78,11 @@
         }
         var data = $this.data('ca2d');
 
-        updState(data.grid, data.settings);
-        print(data.context, data.grid, data.settings);
+        _updState(data.grid, data.settings);
+        _print(data.context, data.grid, data.settings);
       });
 
-      function updState(grid, settings) {
+      function _updState(grid, settings) {
         // A B C
         // D E F
         // H I J
@@ -109,9 +108,9 @@
 
           } // end of for col
         } // end of for row
-      } // end of updState
+      } // end of _updState
 
-      function print(ctx, grid, settings) {
+      function _print(ctx, grid, settings) {
 
         for(var i = 0; i < grid.rows; i++) {
 
@@ -130,11 +129,13 @@
             cell.state = cell.nextstate;
           }
         }
-      } // end of print
-    },
+      } // end of _print
+    }, // end of step
+
     update: function(content) {
       console.log("update");
     }
+    
   };
 
   $.fn.ca2d = function(method) {
