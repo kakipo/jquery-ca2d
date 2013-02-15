@@ -4,19 +4,75 @@
 <meta charset="utf-8" />
 <title>ca2d.js</title>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="jquery.ca2d.min.js"></script>
+<script src="jquery.ca2d.js"></script>
 </head>
 <body>
 <script>
 $(document).ready(function() {
-  $cvs = $('#myCanvas');
-  $cvs.ca2d();
-  $cvs.ca2d("step");
+
+  // set up
+  $("#sampleCanvas1").ca2d();  
+
+  $('#sampleCanvas2').ca2d({
+    color: function(state) {
+      return state == 1 ? "#D0006E" : "#98ED00";
+    }
+  });
+
+  $('#sampleCanvas3').ca2d({
+    cellSize: 6,
+    rule: function(selfstate, neighborStates) {
+      // neighbor
+      // 0 1 2
+      // 3 X 4
+      // 5 6 7
+      var l = [1,3,4,6];
+      var otherTotal = 0;
+      l.forEach(function(i){
+        otherTotal += neighborStates[i];
+      });
+      var nextState = selfstate;
+
+      if(selfstate == 1) {
+        if(otherTotal >= 3 ){
+          nextState = 0;
+        }
+      } else {
+         if(otherTotal <= 2) {
+          nextState = 1;
+        }
+      } 
+      return nextState;
+    }    
+  });
+
+  // first step
+  $('canvas.sample').ca2d("step");
+
+  // determine mobile / pc
+  var agent = navigator.userAgent;
+  if(agent.search(/iPhone/) != -1 || agent.search(/iPad/) != -1) {
+    $('canvas.sample').on("touchstart touchmove touchend", function(e) {
+      e.preventDefault();
+      // $cvs.ca2d("step");
+      $(this).ca2d("step");
+    });
+  } else {
+    $('canvas.sample').on("mousemove", function(e) {
+      // $cvs.ca2d("step");
+      $(this).ca2d("step");
+    });
+  }
+
 });
 
 </script>
-<h1>sample</h1>
-<canvas id="myCanvas" width="400" height="400"></canvas>  
+<h1>sample1</h1>
+<canvas id="sampleCanvas1" class="sample" width="400" height="400"></canvas>  
+<h1>sample2</h1>
+<canvas id="sampleCanvas2" class="sample" width="400" height="400"></canvas>  
+<h1>sample3</h1>
+<canvas id="sampleCanvas3" class="sample" width="400" height="400"></canvas>  
 
 </body>
 </html>
